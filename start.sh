@@ -111,25 +111,24 @@ function searchKernel {
 	SEARCH_PATH=$1
 	
 	if [ -f $SEARCH_PATH/PocketMine-MP*.phar ]; then
-		KERNEL="PocketMine-MP*.phar"
+		KERNEL="$SEARCH_PATH/$(basename $SEARCH_PATH/PocketMine-MP*.phar)"
 		
 	elif [ -f $SEARCH_PATH/Tesseract*.phar ]; then
-		KERNEL="Tesseract*.phar"
+		KERNEL="$SEARCH_PATH/$(basename $SEARCH_PATH/Tesseract*.phar)"
 		
 	elif [ -f $SEARCH_PATH/ClearSky*.phar ]; then
-		KERNEL="ClearSky*.phar"
+		KERNEL="$SEARCH_PATH/$(basename $SEARCH_PATH/ClearSky*.phar)"
 		
 	elif [ -f $SEARCH_PATH/Genisys*.phar ]; then
-		KERNEL="Genisys*.phar"
+		KERNEL="$SEARCH_PATH/$(basename $SEARCH_PATH/Genisys*.phar)"
 		
 	elif [ -f $SEARCH_PATH/src/pocketmine/PocketMine.php ]; then
-		KERNEL="src/pocketmine/PocketMine.php"
+		KERNEL="$SEARCH_PATH/src/pocketmine/PocketMine.php"
 		
 	else
 		return 1
 	fi
 	
-	KERNEL="$SEARCH_PATH/$(basename $SEARCH_PATH/$KERNEL)"
 	return 0
 }
 
@@ -189,6 +188,7 @@ function startServer {
 			$PHP_BINARY $KERNEL ${OPTS[@]}
 		done
 	else
+		echo
 		$PHP_BINARY $KERNEL ${OPTS[@]}
 	fi
 }
