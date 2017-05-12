@@ -2,7 +2,7 @@
 # Website: https://github.com/FaigerSYS/MCPE-Server-Scripts
 
 # Installer version
-VERSION="2.0.1"
+VERSION="2.0.2"
 
 # Fix for files/folders with spaces
 IFS=$'\n'
@@ -90,7 +90,7 @@ function check_packages {
 }
 
 function check_res_availability {
-	log_echo "Checking '$1' using '$DWN_TYPE'..."
+	log_echo "Checking availability of '$1'..."
 	
 	if [ "$DWN_TYPE" == "curl" ]; then
 		HEADER=$(curl --head --location $1 | grep 'HTTP/')
@@ -108,7 +108,7 @@ function check_res_availability {
 }
 
 function get_contents {
-	log_echo "Getting contents of '$1' using '$DWN_TYPE'"
+	log_echo "Getting contents of '$1'..."
 	
 	if [ "$DWN_TYPE" == "curl" ]; then
 		log_p2 curl --globoff --location --insecure "$1"
@@ -209,6 +209,8 @@ function checkDependencies {
 		DWN_TYPE="curl"
 	fi
 	
+	log_echo "Choosed '$DWN_TYPE' as utility for getting content"
+	
 }
 
 function canProcess {
@@ -264,38 +266,45 @@ function installStartScript {
 }
 
 function askBranch {
-	ask "Select branch to install ($DEFAULT_BRANCH): " BRANCH
+	if [ -z "$BRANCH" ]; then
+		ask "Select branch to install ($DEFAULT_BRANCH): " BRANCH
+		NL="\n"
+	fi
 	case $BRANCH in
 		"" | $DEFAULT_BRANCH)
 			if ! check_res_availability "https://api.github.com/repos/$GITHUB/branches/$DEFAULT_BRANCH"; then
 				error "Default branch not found... Maybe it was changed. Aborting"
 			else
 				BRANCH="$DEFAULT_BRANCH"
-				notice "Selected default branch\n"
+				notice "Selected default branch$NL"
 			fi
 		;;
 		*)
 			if ! check_res_availability "https://api.github.com/repos/$GITHUB/branches/$BRANCH"; then
-				error "Choosen branch does not exists! Aborting"
+				error "Branch '$BRANCH' does not exists! Aborting"
 			else
-				notice "Selected branch \"$BRANCH\"\n"
+				notice "Selected branch \"$BRANCH\"$NL"
 			fi
 		;;
 	esac
+	NL=""
 }
 
 function askBuildType {
-	ask "Available kernel types:"
-	ask "    1) Source code ('src' folder)"
-	ask "    2) Packed kernel ('.phar' file)"
-	ask "Choose type (1): " KERNEL_TYPE
+	if [ -z "$KERNEL_TYPE" ]; then
+		ask "Available kernel types:"
+		ask "    1) Source code ('src' folder)"
+		ask "    2) Packed kernel ('.phar' file)"
+		ask "Choose type (1): " KERNEL_TYPE
+		NL="\n"
+	fi
 	case $KERNEL_TYPE in
 		"" | 1 | src | source)
-			notice "Selected source type\n"
+			notice "Selected source type$NL"
 			KERNEL_TYPE="1"
 		;;
 		2 | phar | pack | packed)
-			notice "Selected packed type\n"
+			notice "Selected packed type$NL"
 			KERNEL_TYPE="2"
 		;;
 		*)
@@ -323,6 +332,7 @@ function installKernel {
 			ask "    1) PocketMime-MP (pmmp)"
 			ask "    2) Tesseract"
 			ask "Choose kernel (1): " KERNEL
+			NL="\n"
 		fi
 	fi
 	
@@ -330,16 +340,18 @@ function installKernel {
 	
 	case $KERNEL in
 		"" | 1 | "pmmp" | "PMMP" | "PocketMine-MP" | "pocketMine-mp")
-			notice "Choosed PocketMine-MP kernel\n"
+			notice "Choosed PocketMine-MP kernel$NL"
 			installKernel_PMMP
 		;;
 		2 | "Tesseract" | "tesseract" | "tess")
-			notice "Choosed Tesseract kernel\n"
+			notice "Choosed Tesseract kernel$NL"
 			installKernel_Tesseract
 		;;
 		*)
 			error "Undefined kernel ($KERNEL). Restart script and try again"
 	esac
+	
+	NL=""
 	
 	echo "### PLEASE DO NOT CHANGE THIS FILE ###" > $INSTALL_DATA_FILE
 	echo $INSTALL_DATA_VERSION >> $INSTALL_DATA_FILE
@@ -358,8 +370,8 @@ function installKernel_PMMP {
 	GITHUB="$OWNER/$REPO"
 	DEFAULT_BRANCH="master"
 	
-	[ -z "$BRANCH" ] && askBranch
-	[ -z "$KERNEL_TYPE" ] && [ "$BRANCH" == "$DEFAULT_BRANCH" ] && askBuildType
+	askBranch
+	[ "$BRANCH" == "$DEFAULT_BRANCH" ] && askBuildType
 	
 	if [ "$KERNEL_TYPE" == "1" ]; then
 		check_packages "git"
@@ -395,8 +407,8 @@ function installKernel_Tesseract {
 	GITHUB="$OWNER/$REPO"
 	DEFAULT_BRANCH="master"
 	
-	[ -z "$BRANCH" ] && askBranch
-	[ -z "$KERNEL_TYPE" ] && askBuildType
+	askBranch
+	askBuildType
 	
 	if [ "$KERNEL_TYPE" == "1" ]; then
 		notice "$INSTALLING Tesseract..."
