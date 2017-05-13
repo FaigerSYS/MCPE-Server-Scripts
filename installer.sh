@@ -2,7 +2,7 @@
 # Website: https://github.com/FaigerSYS/MCPE-Server-Scripts
 
 # Installer version
-VERSION="2.0.2"
+VERSION="2.0.3"
 
 # Fix for files/folders with spaces
 IFS=$'\n'
@@ -82,11 +82,13 @@ function check_packages_soft {
 function check_packages {
 	for PACKAGE in "$@"; do
 		[ -z "$NEXT" ] && PACKAGES="'$PACKAGE" && NEXT="y" || PACKAGES="$PACKAGES' or '$PACKAGE"
-		type "$PACKAGE" >/dev/null 2>&1 && IS_OKAY="y"
+		if type "$PACKAGE" >/dev/null 2>&1; then
+			return 0
+		fi
 	done
 	PACKAGES="$PACKAGES'"
 	
-	[ -z "$IS_OKAY" ] && error "You need to have installed $PACKAGES! Aborting"
+	error "You need to have installed $PACKAGES! Aborting"
 }
 
 function check_res_availability {
