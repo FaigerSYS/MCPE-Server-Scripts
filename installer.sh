@@ -83,6 +83,8 @@ function check_packages {
 	for PACKAGE in "$@"; do
 		[ -z "$NEXT" ] && PACKAGES="'$PACKAGE" && NEXT="y" || PACKAGES="$PACKAGES' or '$PACKAGE"
 		if type "$PACKAGE" >/dev/null 2>&1; then
+			PACKAGES=""
+			NEXT=""
 			return 0
 		fi
 	done
