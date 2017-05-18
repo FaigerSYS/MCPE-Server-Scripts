@@ -2,7 +2,7 @@
 # Website: https://github.com/FaigerSYS/MCPE-Server-Scripts
 
 # Installer version
-VERSION="2.0.3"
+VERSION="2.0.4"
 
 # Fix for files/folders with spaces
 IFS=$'\n'
@@ -13,8 +13,8 @@ LOG_FILE="$(pwd)/install.log"
 # Install data version (for updater)
 INSTALL_DATA_VERSION="2"
 
-# Install data file (for updater)
-INSTALL_DATA_FILE="$(pwd)/.install_data"
+# Install data filename (for updater)
+INSTALL_DATA_FILE=".install_data"
 
 function get_date {
 	date -u '+%Y-%m-%d_%H-%M-%S'
@@ -192,6 +192,7 @@ while getopts "p:ukbsc?" OPT 2> /dev/null; do
 		;;
 		esac
 done
+INSTALL_DATA_FILE="$(pwd)/$INSTALL_DATA_FILE"
 
 log_echo "Choosed '$(pwd)' as install path"
 
@@ -375,7 +376,7 @@ function installKernel_PMMP {
 	DEFAULT_BRANCH="master"
 	
 	askBranch
-	[ "$BRANCH" == "$DEFAULT_BRANCH" ] && askBuildType
+	[ "$BRANCH" == "$DEFAULT_BRANCH" ] && askBuildType || KERNEL_TYPE="1"
 	
 	if [ "$KERNEL_TYPE" == "1" ]; then
 		check_packages "git"
